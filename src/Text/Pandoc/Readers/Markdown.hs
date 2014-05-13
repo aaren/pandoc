@@ -887,8 +887,7 @@ para = try $ do
               case B.toList result' of
                    [Image alt tit (Relative src)]
                      | Ext_implicit_figures `Set.member` exts ->
-                        -- the fig: at beginning of title indicates a figure
-                        return $ B.para $ B.image src ("fig:" ++ tit) (B.fromList alt)
+                        return $ B.figure (B.para (B.str tit)) (B.image src "" (B.fromList alt))
                    _ -> return $ B.para result'
 
 plain :: MarkdownParser (F Blocks)
