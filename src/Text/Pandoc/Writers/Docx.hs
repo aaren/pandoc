@@ -460,12 +460,12 @@ blockToOpenXML opts (Header lev (ident,_,_) lst) = do
 blockToOpenXML opts (Plain lst) = withParaProp (pStyle "Compact")
   $ blockToOpenXML opts (Para lst)
 -- title beginning with fig: indicates that the image is a figure
-blockToOpenXML opts (Para [Image alt (Relative (src,'f':'i':'g':':':tit))]) = do
-  paraProps <- getParaProps False
-  contents <- inlinesToOpenXML opts [Image alt (Relative (src,tit))]
-  captionNode <- withParaProp (pStyle "ImageCaption")
-                 $ blockToOpenXML opts (Para alt)
-  return $ mknode "w:p" [] (paraProps ++ contents) : captionNode
+--blockToOpenXML opts (Para [Image alt (Relative (src,'f':'i':'g':':':tit))]) = do
+--  paraProps <- getParaProps False
+--  contents <- inlinesToOpenXML opts [Image alt (Relative (src,tit))]
+--  captionNode <- withParaProp (pStyle "ImageCaption")
+--                 $ blockToOpenXML opts (Para alt)
+--  return $ mknode "w:p" [] (paraProps ++ contents) : captionNode
 -- fixDisplayMath sometimes produces a Para [] as artifact
 blockToOpenXML _ (Para []) = return []
 blockToOpenXML opts (Para lst) = do
@@ -741,8 +741,8 @@ inlineToOpenXML opts (Link txt (src,_)) = do
                         M.insert src i extlinks }
               return i
   return [ mknode "w:hyperlink" [("r:id",id')] contents ]
-inlineToOpenXML opts (Image alt (Encoded _)) = inlineToOpenXML opts (Strong $ Str "Embedded Image:" : alt)
-inlineToOpenXML opts (Image alt (Relative (src, tit))) = do
+inlineToOpenXML opts (Image alt _ (Encoded _)) = inlineToOpenXML opts (Strong $ Str "Embedded Image:" : alt)
+inlineToOpenXML opts (Image alt tit (Relative src)) = do
   -- first, check to see if we've already done this image
   imgs <- gets stImages
   case M.lookup src imgs of

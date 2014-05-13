@@ -310,13 +310,13 @@ blockToLaTeX (Div (_,classes,_) bs) = do
 blockToLaTeX (Plain lst) =
   inlineListToLaTeX $ dropWhile isLineBreakOrSpace lst
 -- title beginning with fig: indicates that the image is a figure
-blockToLaTeX (Para [Image txt (Relative (src,'f':'i':'g':':':tit))]) = do
-  capt <- if null txt
-             then return empty
-             else (\c -> "\\caption" <> braces c) `fmap` inlineListToLaTeX txt
-  img <- inlineToLaTeX (Image txt (Relative (src,tit)))
-  return $ "\\begin{figure}[htbp]" $$ "\\centering" $$ img $$
-           capt $$ "\\end{figure}"
+--blockToLaTeX (Para [Image txt (Relative (src,'f':'i':'g':':':tit))]) = do
+--  capt <- if null txt
+--             then return empty
+--             else (\c -> "\\caption" <> braces c) `fmap` inlineListToLaTeX txt
+--  img <- inlineToLaTeX (Image txt (Relative (src,tit)))
+--  return $ "\\begin{figure}[htbp]" $$ "\\centering" $$ img $$
+--           capt $$ "\\end{figure}"
 -- . . . indicates pause in beamer slides
 blockToLaTeX (Para [Str ".",Space,Str ".",Space,Str "."]) = do
   beamer <- writerBeamer `fmap` gets stOptions
@@ -761,14 +761,14 @@ inlineToLaTeX (Link txt (src, _)) =
                 src' <- stringToLaTeX URLString src
                 return $ text ("\\href{" ++ src' ++ "}{") <>
                          contents <> char '}'
-inlineToLaTeX (Image _ (Relative (source, _))) = do
+inlineToLaTeX (Image _ _ (Relative source)) = do
   modify $ \s -> s{ stGraphics = True }
   let source' = if isURI source
                    then source
                    else unEscapeString source
   source'' <- stringToLaTeX URLString source'
   return $ "\\includegraphics" <> braces (text source'')
-inlineToLaTeX (Image alt (Encoded _)) = do
+inlineToLaTeX (Image alt _ (Encoded _)) = do
   let alt' = Str "Embedded Image" : alt
   capt <- (\c -> "\\caption" <> braces c) <$> inlineListToLaTeX alt'
   return $ "\\begin{figure}[htbp]" $$ "\\centering" $$ 

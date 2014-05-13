@@ -42,7 +42,7 @@ type WS a = State WriterState a
 
 defaultWriterState :: WriterState
 defaultWriterState = WriterState{
-    blockStyles  = Set.empty 
+    blockStyles  = Set.empty
   , inlineStyles = Set.empty
   , links        = []
   , listDepth    = 1
@@ -267,7 +267,7 @@ hyperlinksToDoc (x:xs) = hyp x $$ hyperlinksToDoc xs
                   $ inTags False "BorderColor" [("type","enumeration")] (text "Black")
                   $$ (inTags False "Destination" [("type","object")]
                   $ text $ "HyperlinkURLDestination/"++(escapeStringForXML url))
-  
+
 
 -- | Convert a list of Pandoc blocks to ICML.
 blocksToICML :: WriterOptions -> Style -> [Block] -> WS Doc
@@ -352,7 +352,7 @@ listItemsToICML opts listType style attribs (first:rest) = do
 -- | Convert a list of blocks to ICML list items.
 listItemToICML :: WriterOptions -> Style -> Bool-> Maybe ListAttributes -> [Block] -> WS Doc
 listItemToICML opts style isFirst attribs item =
-  let makeNumbStart (Just (beginsWith, numbStl, _)) = 
+  let makeNumbStart (Just (beginsWith, numbStl, _)) =
         let doN DefaultStyle = []
             doN LowerRoman = [lowerRomanName]
             doN UpperRoman = [upperRomanName]
@@ -415,8 +415,8 @@ inlineToICML opts style (Link lst (url, title)) = do
                 cont  = inTags True "HyperlinkTextSource"
                          [("Self","htss-"++show ident), ("Name",title), ("Hidden","false")] content
             in  (cont, newst)
-inlineToICML opts style (Image alt target) = 
-  case target of 
+inlineToICML opts style (Image alt _ target) =
+  case target of
     Relative t -> imageICML opts style alt t
     Encoded _ -> inlineToICML opts style (Strong $ Str "Embedded Image":alt)
 inlineToICML opts style (Note lst) = footnoteToICML opts style lst
@@ -470,7 +470,7 @@ parStyle opts style lst =
 
 -- | Wrap a Doc in an ICML Character Style.
 charStyle :: Style -> Doc -> WS Doc
-charStyle style content = 
+charStyle style content =
   let (stlStr, attrs) = styleToStrAttr style
       doc = inTags True "CharacterStyleRange" attrs $ inTagsSimple "Content" $ flush content
   in  do
@@ -491,8 +491,8 @@ styleToStrAttr style =
   in  (stlStr, attrs)
 
 -- | Assemble an ICML Image.
-imageICML :: WriterOptions -> Style -> [Inline] -> Target -> WS Doc
-imageICML _ style _ (linkURI, _) =
+imageICML :: WriterOptions -> Style -> [Inline] -> String -> WS Doc
+imageICML _ style _ linkURI =
   let imgWidth  = 300::Int --TODO: set width, height dynamically as in Docx.hs
       imgHeight = 200::Int
       scaleFact = show (1::Double) --TODO: set scaling factor so image is scaled exactly to imgWidth x imgHeight
